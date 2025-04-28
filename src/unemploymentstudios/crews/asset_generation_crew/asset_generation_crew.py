@@ -55,7 +55,7 @@ class GenerateAndDownloadImageTool(BaseTool):
         n               = 1
 
         # -- Make sure OPENAI_API_KEY is set
-        openai_key = "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"
+        openai_key = os.getenv("OPENAI_API_KEY")
         if not openai_key:
             return "OPENAI_API_KEY is not set in the environment."
 
