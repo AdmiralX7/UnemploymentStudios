@@ -355,7 +355,11 @@ class GameFlow(Flow[GameState]):
                 "visual_style": expanded_concept.visual_style,
                 "audio_style": expanded_concept.audio_style,
                 "title": expanded_concept.title,
-                "date": datetime.now().strftime("%Y%m%d"),  # ← fix
+                "date": datetime.now().strftime("%Y%m%d"), 
+                "file": "placeholder.wav",
+                "original_url": "https://placeholder.url",
+                "licence": "CC0",
+                "attribution": "placeholder attribution",
 
             }
 

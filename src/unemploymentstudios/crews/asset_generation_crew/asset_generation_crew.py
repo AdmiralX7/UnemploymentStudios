@@ -11,6 +11,10 @@ import re
 import json
 import pathlib
 import requests
+import dotenv
+
+dotenv.load_dotenv()
+
 from typing import Any, List, Optional, Type
 
 from bs4 import BeautifulSoup    
@@ -48,10 +52,10 @@ class GenerateAndDownloadImageTool(BaseTool):
         size            = kwargs.get("size", "1024x1024")
         response_format = kwargs.get("response_format", "url")
         model           = "dall-e-3"
-        n               = kwargs.get("n", 1)
+        n               = 1
 
         # -- Make sure OPENAI_API_KEY is set
-        openai_key = os.getenv("OPENAI_API_KEY")
+        openai_key = "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"
         if not openai_key:
             return "OPENAI_API_KEY is not set in the environment."
 
@@ -62,7 +66,7 @@ class GenerateAndDownloadImageTool(BaseTool):
         response = client.images.generate(
             prompt=prompt,
             n=n,
-            size=size,
+            size="1024x1024",
             response_format=response_format,
             model=model,
         )
@@ -125,111 +129,98 @@ class SearchAndSaveSoundToolArgs(BaseModel):
         description="Maximum number of results to consider (the first hit will be downloaded)"
     )
 
-
 class SearchAndSaveSoundTool(BaseTool):
-    """
-    Searches Freesound for the query, downloads the first preview,
-    and returns metadata as a JSON string.
-    """
-
+    args_schema: Type[BaseModel] = SearchAndSaveSoundToolArgs
     name: str = "search_and_save_sound"
     description: str = (
-        "Search Freesound for an audio clip and save the first preview to disk. "
-        "Returns a JSON blob describing the saved file."
+        "Search for a sound on Freesound and save the first result's preview locally."
+        " The sound will be saved in the specified output path."
     )
-    args_schema = SearchAndSaveSoundToolArgs
+    def _run(self, *, query: str, output_path: str, max_results: int = 5, **_) -> Any:
+        api_key = "tywbJyFLonrEAkWhUoSIyK7VLKOZiLVO7u9Pm6ea"
+        if not api_key:
+            return json.dumps({"error": "FREESOUND_API_KEY not set in environment variables."})
 
-    def __init__(self, freesound_client, **kwargs):
-        """
-        Parameters
-        ----------
-        freesound_client : freesound.FreesoundClient
-            An authenticated Freesound client instance.
-        """
-        super().__init__(**kwargs)
-        self.client = freesound_client
-
-    # ---------- sync run ----------
-    def _run(
-        self,
-        *,
-        query: str,
-        output_path: str,
-        max_results: int = 5,
-        **_
-    ) -> Any:
-        # ------------------------------------------------------------------ #
-        # 1. Fetch search results                                             #
-        # ------------------------------------------------------------------ #
-        pager = self.client.text_search(
-            query=query,
-            sort="score",
-            fields="id,name,username,previews",
-            page_size=max_results,
-        )
-        results = list(pager[: max_results])
-
-        if not results:
-            return json.dumps({"error": "No results found."})
-
-        chosen_sound = results[0]
-        sound_id = chosen_sound.id
-        sound_user = chosen_sound.username
-        url = f"https://freesound.org/people/{sound_user}/sounds/{sound_id}/"
-
-        # ------------------------------------------------------------------ #
-        # 2. Scrape a short description                                       #
-        # ------------------------------------------------------------------ #
+        headers = {"Authorization": f"Token {api_key}"}
+        
         try:
-            page = requests.get(url, timeout=10)
-            page.raise_for_status()
-            soup = BeautifulSoup(page.content, "html.parser")
-            desc_section = soup.find(id="soundDescriptionSection")
-            raw_desc = re.sub(r"<.*?>", "", str(desc_section)) if desc_section else ""
-        except Exception:
-            raw_desc = "N/A"
+            # Step 1: Search Freesound API for sounds
+            search_url = "https://freesound.org/apiv2/search/text/"
+            params = {
+                "query": query,
+                "page_size": max_results,
+                "fields": "id,name,previews,url,license,username"
+            }
+            response = requests.get(search_url, headers=headers, params=params, timeout=60)
+            response.raise_for_status()
+            data = response.json()
 
-        # ------------------------------------------------------------------ #
-        # 3. Save the preview locally                                         #
-        # ------------------------------------------------------------------ #
-        try:
-            directory = os.path.dirname(output_path)
-            filename = os.path.basename(output_path)
+            if "results" not in data or len(data["results"]) == 0:
+                return json.dumps({"error": f"No search results found for query: {query}"})
 
-            if directory and not os.path.exists(directory):
-                os.makedirs(directory, exist_ok=True)
+            # Step 2: Loop through results to find valid preview
+            results = data["results"]
 
-            chosen_sound.retrieve_preview(directory, filename)
+            chosen_sound = None
+            preview_url = None
+
+            for candidate in results:
+                previews = candidate.get("previews", {})
+                candidate_preview = previews.get("preview-hq-mp3") or previews.get("preview-lq-mp3")
+                if candidate_preview:
+                    chosen_sound = candidate
+                    preview_url = candidate_preview
+                    break
+
+
+            if not preview_url:
+                return json.dumps({"error": f"No preview audio available in top results.{query}"})
+
+            # Step 3: Download the preview audio
+            audio_data = requests.get(preview_url, timeout=15)
+            audio_data.raise_for_status()
+
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+            # Save the audio file
+            with open(output_path, "wb") as f:
+                f.write(audio_data.content)
+
+            # Step 4: Scrape a short description from Freesound page
+            url = f"https://freesound.org/people/{chosen_sound['username']}/sounds/{chosen_sound['id']}/"
+
+            try:
+                page = requests.get(url, timeout=15)
+                soup = BeautifulSoup(page.content, "html.parser")
+                desc_section = soup.find(id="soundDescriptionSection")
+                raw_desc = re.sub(r"<.*?>", "", str(desc_section)) if desc_section else ""
+            except Exception:
+                raw_desc = "N/A"
+
+            # Step 5: Build and return response
+            response_data = {
+                "chosen_sound_id": chosen_sound["id"],
+                "name": chosen_sound["name"],
+                "description": raw_desc.strip(),
+                "saved_path": output_path
+            }
+            return json.dumps(response_data, indent=2)
+
         except Exception as e:
-            return json.dumps(
-                {
-                    "error": f"Failed to save sound (ID={sound_id}): {e}"
-                }
-            )
+            return json.dumps({"error": f"Failed to fetch or save audio: {str(e)}"})
 
-        # ------------------------------------------------------------------ #
-        # 4. Build & return response                                          #
-        # ------------------------------------------------------------------ #
-        response_data = {
-            "chosen_sound_id": sound_id,
-            "name": chosen_sound.name,
-            "description": raw_desc.strip(),
-            "saved_path": os.path.abspath(output_path),
-        }
-        return json.dumps(response_data, indent=2)
-
-    # ---------- async run (CrewAI expects this wrapper) ----------
-    async def _arun(self, **kwargs) -> Any:  # noqa: D401
+    async def _arun(self, **kwargs) -> Any:
         return self._run(**kwargs)
-
 @CrewBase
 class AssetGenerationCrew:
     """Asset Generation Crew for game development"""
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
+
     # Basic configuration
     llm = LLM(model="gpt-4o")
+
 
     # --------------------------------------------------
     # AGENTS
@@ -240,13 +231,21 @@ class AssetGenerationCrew:
             config=self.agents_config["graphic_designer"],
             llm=self.llm
         )
-   
+    @agent
+    def sound_designer(self) -> Agent:
+        return Agent(
+            config=self.agents_config["sound_designer"],
+            llm=self.llm
+        )
+
+
     @agent
     def ui_designer(self) -> Agent:
         return Agent(
             config=self.agents_config["ui_designer"],
             llm=self.llm
         )
+
 
     @agent
     def asset_manager(self) -> Agent:
@@ -262,9 +261,19 @@ class AssetGenerationCrew:
             llm=self.llm,
         )
     @agent
+    def audio_sourcer(self) -> Agent:
+        """Fetches & normalises audio via the custom Freesound tool."""
+        fs_tool = SearchAndSaveSoundTool(result_as_answer=True)      # ← uses the code you supplied
+        return Agent(
+            config=self.agents_config["audio_sourcer"],
+            tools=[fs_tool],
+            llm=self.llm,
+        )
+    @agent
     def asset_integrator(self) -> Agent:
         """Agent that pipes finished assets into the codebase / repo."""
         return Agent(config=self.agents_config["asset_integrator"], llm=self.llm)
+
 
     # --------------------------------------------------
     # TASKS
@@ -275,12 +284,14 @@ class AssetGenerationCrew:
             config=self.tasks_config["analyze_asset_requirements"]
         )
 
+
     @task
     def design_character_assets(self) -> Task:
         return Task(
             config=self.tasks_config["design_character_assets"],
             context=[self.analyze_asset_requirements()]
         )
+
 
     @task
     def design_environment_assets(self) -> Task:
@@ -289,12 +300,31 @@ class AssetGenerationCrew:
             context=[self.analyze_asset_requirements()]
         )
 
+
     @task
     def design_ui_elements(self) -> Task:
         return Task(
             config=self.tasks_config["design_ui_elements"],
             context=[self.analyze_asset_requirements()]
         )
+
+
+    @task
+    def create_sound_effects(self) -> Task:
+        return Task(
+            config=self.tasks_config["create_sound_effects"],
+            context=[self.analyze_asset_requirements()]
+        )
+
+
+    @task
+    def create_background_music(self) -> Task:
+        return Task(
+            config=self.tasks_config["create_background_music"],
+            context=[self.analyze_asset_requirements()]
+        )
+
+
     @task
     def finalize_assets(self) -> Task:
         return Task(
@@ -304,6 +334,8 @@ class AssetGenerationCrew:
                 self.design_character_assets(),
                 self.design_environment_assets(),
                 self.design_ui_elements(),
+                self.create_sound_effects(),
+                self.create_background_music()
             ]
         )
     @task
@@ -312,15 +344,27 @@ class AssetGenerationCrew:
             config=self.tasks_config["generate_visual_assets"],
             context=[self.analyze_asset_requirements()],
         )
+
+
+    @task
+    def source_audio_assets(self) -> Task:
+        return Task(
+            config=self.tasks_config["source_audio_assets"],
+            context=[self.analyze_asset_requirements()],
+        )
+
+
     @task
     def integrate_assets(self) -> Task:
         return Task(
             config=self.tasks_config["integrate_assets"],
             context=[
                 self.generate_visual_assets(),
-                self.finalize_assets()
+                self.source_audio_assets(),
+                self.finalize_assets(),
             ],
         )
+
 
     # --------------------------------------------------
     # CREW
@@ -334,3 +378,24 @@ class AssetGenerationCrew:
             process=Process.sequential,
             verbose=True
         )
+if __name__ == "__main__":
+    # Initialize the crew
+    ag_crew = AssetGenerationCrew()
+    crew_instance = ag_crew.crew()
+
+    # Build dummy inputs just to allow the tasks to kick off
+    asset_inputs = {
+        "main_character": {"name": "Test Hero", "description": "A brave warrior."},
+        "supporting_characters": [{"name": "Sidekick", "description": "Helpful companion."}],
+        "world_building": "Fantasy forest setting",
+        "levels": [{"name": "Level 1", "description": "Starting village"}],
+        "visual_style": "Pixel art retro",
+        "audio_style": "8-bit chiptune",
+        "title": "Test Adventure",
+        "date": "20240501",
+    }
+
+    # Run the Crew with the dummy inputs
+    output = crew_instance.kickoff(inputs=asset_inputs)
+    print("\n=== ASSET GENERATION OUTPUT ===\n")
+    print(output)
