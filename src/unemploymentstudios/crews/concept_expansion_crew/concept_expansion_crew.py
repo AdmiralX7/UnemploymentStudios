@@ -16,7 +16,11 @@ class ConceptExpansionCrew:
     tasks_config = "config/tasks.yaml"
 
     # Basic configuration
+<<<<<<< HEAD
     llm = LLM(model="openai/gpt-4o")
+=======
+    llm = LLM(model="gpt-4o")
+>>>>>>> fbca81a (abhi image gen version)
 
     # Advanced configuration with detailed parameters
     '''

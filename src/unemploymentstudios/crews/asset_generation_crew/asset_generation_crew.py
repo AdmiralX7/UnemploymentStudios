@@ -12,7 +12,6 @@ import json
 import pathlib
 import requests
 from typing import Any, List, Optional, Type
-import dotenv
 
 from bs4 import BeautifulSoup    
 # ---------------------------------------------------------------------------
@@ -23,7 +22,6 @@ from typing import Any
 
 # --------------------------- The actual Tool class ---------------------------
 class GenerateAndDownloadImageSchema(BaseModel):
-    # print("GenerateAndDownloadImageSchema RUNNING")
     prompt          : str = Field(..., description="Prompt for DALL·E")
     file_name       : str = Field(..., description="Where to save the image (PNG)")
     size            : str = Field("1024x1024", description="Image resolution")
@@ -36,7 +34,6 @@ class GenerateAndDownloadImageTool(BaseTool):
     A single tool that generates an image via OpenAI’s DALL·E API
     and downloads it locally (**url** or **b64_json** variant).
     """
-    # print("GenerateAndDownloadImageTool RUNNING")
     name        : str = "generate_and_download_image"
     description : str = (
         "Generate an image from a prompt via DALL·E, "
@@ -50,16 +47,16 @@ class GenerateAndDownloadImageTool(BaseTool):
         file_name       = kwargs["file_name"]
         size            = kwargs.get("size", "1024x1024")
         response_format = kwargs.get("response_format", "url")
-        model           = kwargs.get("model", "dall-e-3")
+        model           = "dall-e-3"
         n               = kwargs.get("n", 1)
 
         # -- Make sure OPENAI_API_KEY is set
-        dotenv.load_dotenv(override=True)
-        if not os.getenv("OPENAI_API_KEY"):
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if not openai_key:
             return "OPENAI_API_KEY is not set in the environment."
 
         # -- Configure client
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = OpenAI(api_key=openai_key)
 
         # -- Call DALL·E
         response = client.images.generate(
@@ -131,9 +128,10 @@ class SearchAndSaveSoundToolArgs(BaseModel):
 
 class SearchAndSaveSoundTool(BaseTool):
     """
-    Searches Freesound for the query, scrapes the first result using BeautifulSoup,
-    and downloads the preview audio file.
+    Searches Freesound for the query, downloads the first preview,
+    and returns metadata as a JSON string.
     """
+
     name: str = "search_and_save_sound"
     description: str = (
         "Search Freesound for an audio clip and save the first preview to disk. "
@@ -141,9 +139,17 @@ class SearchAndSaveSoundTool(BaseTool):
     )
     args_schema = SearchAndSaveSoundToolArgs
 
-    def __init__(self, **kwargs):
+    def __init__(self, freesound_client, **kwargs):
+        """
+        Parameters
+        ----------
+        freesound_client : freesound.FreesoundClient
+            An authenticated Freesound client instance.
+        """
         super().__init__(**kwargs)
+        self.client = freesound_client
 
+    # ---------- sync run ----------
     def _run(
         self,
         *,
@@ -152,38 +158,70 @@ class SearchAndSaveSoundTool(BaseTool):
         max_results: int = 5,
         **_
     ) -> Any:
-        import os
-        import json
-        from freesound import FreesoundClient
-        import requests
+        # ------------------------------------------------------------------ #
+        # 1. Fetch search results                                             #
+        # ------------------------------------------------------------------ #
+        pager = self.client.text_search(
+            query=query,
+            sort="score",
+            fields="id,name,username,previews",
+            page_size=max_results,
+        )
+        results = list(pager[: max_results])
 
-        api_key = os.getenv("FREESOUND_API_KEY")
-        if not api_key:
-            return json.dumps({"error": "FREESOUND_API_KEY not set in environment."})
-        client = FreesoundClient()
-        client.set_token(api_key, "token")
+        if not results:
+            return json.dumps({"error": "No results found."})
 
+        chosen_sound = results[0]
+        sound_id = chosen_sound.id
+        sound_user = chosen_sound.username
+        url = f"https://freesound.org/people/{sound_user}/sounds/{sound_id}/"
+
+        # ------------------------------------------------------------------ #
+        # 2. Scrape a short description                                       #
+        # ------------------------------------------------------------------ #
         try:
-            results = client.text_search(query=query, fields="id,name,previews,url", page_size=max_results)
-            if not results or len(results) == 0:
-                return json.dumps({"error": "No results found."})
-            sound = results[0]
-            preview_url = sound.previews.preview_hq_mp3 or sound.previews.preview_lq_mp3
-            if not preview_url:
-                return json.dumps({"error": "No preview audio found for this sound."})
-            audio_data = requests.get(preview_url, timeout=15)
-            audio_data.raise_for_status()
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            with open(output_path, "wb") as f:
-                f.write(audio_data.content)
-            return json.dumps({
-                "file": output_path,
-                "original_url": sound.url,
-                "preview_url": preview_url,
-                "message": f"Audio saved as {output_path}"
-            }, indent=2)
+            page = requests.get(url, timeout=10)
+            page.raise_for_status()
+            soup = BeautifulSoup(page.content, "html.parser")
+            desc_section = soup.find(id="soundDescriptionSection")
+            raw_desc = re.sub(r"<.*?>", "", str(desc_section)) if desc_section else ""
+        except Exception:
+            raw_desc = "N/A"
+
+        # ------------------------------------------------------------------ #
+        # 3. Save the preview locally                                         #
+        # ------------------------------------------------------------------ #
+        try:
+            directory = os.path.dirname(output_path)
+            filename = os.path.basename(output_path)
+
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory, exist_ok=True)
+
+            chosen_sound.retrieve_preview(directory, filename)
         except Exception as e:
-            return json.dumps({"error": f"Failed to fetch or save audio: {e}"})
+            return json.dumps(
+                {
+                    "error": f"Failed to save sound (ID={sound_id}): {e}"
+                }
+            )
+
+        # ------------------------------------------------------------------ #
+        # 4. Build & return response                                          #
+        # ------------------------------------------------------------------ #
+        response_data = {
+            "chosen_sound_id": sound_id,
+            "name": chosen_sound.name,
+            "description": raw_desc.strip(),
+            "saved_path": os.path.abspath(output_path),
+        }
+        return json.dumps(response_data, indent=2)
+
+    # ---------- async run (CrewAI expects this wrapper) ----------
+    async def _arun(self, **kwargs) -> Any:  # noqa: D401
+        return self._run(**kwargs)
+
 @CrewBase
 class AssetGenerationCrew:
     """Asset Generation Crew for game development"""
@@ -202,14 +240,7 @@ class AssetGenerationCrew:
             config=self.agents_config["graphic_designer"],
             llm=self.llm
         )
-
-    @agent
-    def sound_designer(self) -> Agent:
-        return Agent(
-            config=self.agents_config["sound_designer"],
-            llm=self.llm
-        )
-
+   
     @agent
     def ui_designer(self) -> Agent:
         return Agent(
@@ -227,16 +258,7 @@ class AssetGenerationCrew:
     def image_generator(self) -> Agent:
         return Agent(
             config=self.agents_config["image_generator"],
-            tools=[GenerateAndDownloadImageTool()],   # now saves files
-            llm=self.llm,
-        )
-    @agent
-    def audio_sourcer(self) -> Agent:
-        """Fetches & normalises audio via the custom Freesound tool."""
-        fs_tool = SearchAndSaveSoundTool()      # uses the code you supplied
-        return Agent(
-            config=self.agents_config["audio_sourcer"],
-            tools=[fs_tool],
+            tools=[GenerateAndDownloadImageTool(result_as_answer=True)],   # 🟢 now saves files
             llm=self.llm,
         )
     @agent
@@ -273,21 +295,6 @@ class AssetGenerationCrew:
             config=self.tasks_config["design_ui_elements"],
             context=[self.analyze_asset_requirements()]
         )
-
-    @task
-    def create_sound_effects(self) -> Task:
-        return Task(
-            config=self.tasks_config["create_sound_effects"],
-            context=[self.analyze_asset_requirements()]
-        )
-
-    @task
-    def create_background_music(self) -> Task:
-        return Task(
-            config=self.tasks_config["create_background_music"],
-            context=[self.analyze_asset_requirements()]
-        )
-
     @task
     def finalize_assets(self) -> Task:
         return Task(
@@ -297,158 +304,21 @@ class AssetGenerationCrew:
                 self.design_character_assets(),
                 self.design_environment_assets(),
                 self.design_ui_elements(),
-                self.create_sound_effects(),
-                self.create_background_music()
             ]
         )
     @task
     def generate_visual_assets(self) -> Task:
-        """Force image generation by ensuring the tools are used directly"""
-        task = Task(
+        return Task(
             config=self.tasks_config["generate_visual_assets"],
             context=[self.analyze_asset_requirements()],
         )
-        
-        # Override the task execution method to ensure tools are used
-        original_execute = task.execute
-        
-        def ensure_tool_usage(*args, **kwargs):
-            # First, run the normal task execution
-            result = original_execute(*args, **kwargs)
-            
-            # Check if any images were created
-            import os
-            import json
-            
-            # If no images were created during the normal execution, create some fallback images
-            if not os.path.exists("./assets/images") or len(os.listdir("./assets/images")) <= 1:  # Only the test_direct.png exists
-                print("No images created by agent! Generating fallback images...")
-                
-                # Get the tools from the image_generator agent
-                image_tool = None
-                for tool in self.image_generator().tools:
-                    if tool.name == "generate_and_download_image":
-                        image_tool = tool
-                        break
-                
-                if image_tool:
-                    # Create basic game images directly
-                    basic_images = [
-                        ("main_character", "A hero character for a video game with determined expression, detailed pixel art style"),
-                        ("enemy", "A menacing enemy character for a video game, detailed pixel art style"),
-                        ("background", "A beautiful game background landscape, pixel art style"),
-                        ("ui_button", "A stylish game UI button in pixel art style"),
-                        ("logo", "A game logo with stylized text, pixel art style")
-                    ]
-                    
-                    manifest = {}
-                    for name, prompt in basic_images:
-                        try:
-                            filename = f"./assets/images/{name}.png"
-                            print(f"Directly generating image: {filename} with prompt: {prompt}")
-                            result_str = image_tool._run(prompt=prompt, file_name=filename)
-                            result_json = json.loads(result_str)
-                            manifest[name] = {
-                                "file": filename,
-                                "prompt": prompt,
-                                "width": 1024,
-                                "height": 1024
-                            }
-                            print(f"Generated image: {filename}")
-                        except Exception as e:
-                            print(f"Error generating image {name}: {e}")
-                    
-                    # Save manifest
-                    os.makedirs("./assets", exist_ok=True)
-                    with open("./assets/manifest_images.json", "w") as f:
-                        json.dump(manifest, f, indent=2)
-                    
-                    # Update result with information about the directly generated images
-                    result += "\n\nFallback images were generated directly: " + ", ".join([name for name, _ in basic_images])
-            
-            return result
-        
-        # Replace the execute method with our enhanced version
-        task.execute = ensure_tool_usage
-        return task
-
-    @task
-    def source_audio_assets(self) -> Task:
-        """Force audio generation by ensuring the tools are used directly"""
-        task = Task(
-            config=self.tasks_config["source_audio_assets"],
-            context=[self.analyze_asset_requirements()],
-        )
-        
-        # Override the task execution method to ensure tools are used
-        original_execute = task.execute
-        
-        def ensure_audio_tool_usage(*args, **kwargs):
-            # First, run the normal task execution
-            result = original_execute(*args, **kwargs)
-            
-            # Check if any audio files were created
-            import os
-            import json
-            
-            # If no audio files were created during the normal execution, create some fallback sounds
-            if not os.path.exists("./assets/audio") or len(os.listdir("./assets/audio")) <= 1:  # Only the test_direct.mp3 exists
-                print("No audio files created by agent! Generating fallback audio...")
-                
-                # Get the tools from the audio_sourcer agent
-                audio_tool = None
-                for tool in self.audio_sourcer().tools:
-                    if tool.name == "search_and_save_sound":
-                        audio_tool = tool
-                        break
-                
-                if audio_tool:
-                    # Create basic game sounds directly
-                    basic_sounds = [
-                        ("background_music", "game background music"),
-                        ("jump_sound", "game jump sound effect"),
-                        ("collect_item", "game collect item sound")
-                    ]
-                    
-                    manifest = {}
-                    for name, query in basic_sounds:
-                        try:
-                            filename = f"./assets/audio/{name}.mp3"
-                            print(f"Directly searching for audio: {filename} with query: {query}")
-                            result_str = audio_tool._run(query=query, output_path=filename)
-                            result_json = json.loads(result_str)
-                            manifest[name] = {
-                                "file": filename,
-                                "query": query,
-                                "original_url": result_json.get("original_url", ""),
-                                "preview_url": result_json.get("preview_url", "")
-                            }
-                            print(f"Retrieved audio: {filename}")
-                        except Exception as e:
-                            print(f"Error retrieving audio {name}: {e}")
-                    
-                    # Save manifest
-                    os.makedirs("./assets", exist_ok=True)
-                    with open("./assets/manifest_audio.json", "w") as f:
-                        json.dump(manifest, f, indent=2)
-                    
-                    # Update result with information about the directly generated audio
-                    result += "\n\nFallback audio files were generated directly: " + ", ".join([name for name, _ in basic_sounds])
-            
-            return result
-        
-        # Replace the execute method with our enhanced version
-        task.execute = ensure_audio_tool_usage
-        return task
-
     @task
     def integrate_assets(self) -> Task:
         return Task(
             config=self.tasks_config["integrate_assets"],
             context=[
                 self.generate_visual_assets(),
-                self.source_audio_assets(),
-                self.finalize_assets(),
+                self.finalize_assets()
             ],
         )
 
@@ -459,27 +329,8 @@ class AssetGenerationCrew:
     def crew(self) -> Crew:
         """Create the crew"""
         return Crew(
-            agents=[
-                self.asset_manager(),
-                self.graphic_designer(),
-                self.sound_designer(),
-                self.ui_designer(),
-                self.image_generator(),  # Explicitly include image generator
-                self.audio_sourcer(),    # Explicitly include audio sourcer
-                self.asset_integrator()
-            ],
-            tasks=[
-                self.analyze_asset_requirements(),
-                self.design_character_assets(),
-                self.design_environment_assets(),
-                self.design_ui_elements(),
-                self.create_sound_effects(),
-                self.create_background_music(),
-                self.finalize_assets(),
-                self.generate_visual_assets(),  # Explicitly include visual asset generation
-                self.source_audio_assets(),     # Explicitly include audio asset generation
-                self.integrate_assets()
-            ],
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True
         )

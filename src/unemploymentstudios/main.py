@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-import os
-import dotenv
-dotenv.load_dotenv(override=True)
+from datetime import datetime
 from typing import Dict
 from random import randint
 from pydantic import BaseModel, Field
@@ -18,12 +16,16 @@ from unemploymentstudios.crews.testing_qa_crew.testing_qa_crew import TestingQAC
 from unemploymentstudios.types import GameConcept
 
 # Additional Imports
+import os
 import asyncio
 import time
 import json
+import dotenv
 import shutil
 import pathlib
 from pathlib import Path
+# Load environment variables from .env file
+dotenv.load_dotenv()
 
 # Load concept from file or create default if it doesn't exist
 concept_path = os.path.join(os.path.dirname(__file__), "knowledge", "concept.json")
@@ -313,91 +315,26 @@ class GameFlow(Flow[GameState]):
         """
         output_dir = "./Game"
 
-        # Skip any paths that try to write outside the Game directory
-        if filename.startswith('/'):
-            print(f"Warning: Skipping file with absolute path: {filename}")
-            # Store a sanitized version in the state
-            safe_filename = filename.lstrip('/')
-            self.state.generatedCodeFiles[safe_filename] = content
-            return
-
         # ── 1️⃣ Ignore or create directory‑only specs ───────────────────────────────
         if filename.endswith("/") or os.path.basename(filename) == "":
-            try:
-                dir_path = os.path.join(output_dir, filename)
-                os.makedirs(dir_path, exist_ok=True)
-                print(f"Created directory (no file to write): {dir_path}")
-            except OSError as e:
-                print(f"Warning: Could not create directory {dir_path}: {e}")
+            dir_path = os.path.join(output_dir, filename)
+            os.makedirs(dir_path, exist_ok=True)
+            print(f"Created directory (no file to write): {dir_path}")
             return
 
         # ── 2️⃣ Ensure parent folders exist (unchanged) ────────────────────────────
         if "/" in filename:
             sub_path = os.path.dirname(filename)
             full_dir_path = os.path.join(output_dir, sub_path)
-            try:
-                os.makedirs(full_dir_path, exist_ok=True)
-            except OSError as e:
-                print(f"Warning: Could not create directory {full_dir_path}: {e}")
-                # Skip file creation if we can't create the directory
-                return
+            os.makedirs(full_dir_path, exist_ok=True)
 
         # ── 3️⃣ Write the file (unchanged) ─────────────────────────────────────────
         file_path = os.path.join(output_dir, filename)
-        try:
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(content)
-            print(f"Wrote file: {file_path}")
-        except OSError as e:
-            print(f"Warning: Could not write file {file_path}: {e}")
-            # Store the content in state even if we couldn't write to disk
-            self.state.generatedCodeFiles[filename] = content
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
 
-    @listen(save_file_structure)
-    async def write_code_files(self):
-        """
-        Parse the file structure planning output, 
-        spawn an async writing job for each file, and await them concurrently.
-        """
-        print("=== Starting Code Generation Phase ===")
-        print("Generating code files concurrently...")
+        print(f"Wrote file: {file_path}")
 
-        # Parse the file structure planning output into a Python list or dict
-        # Adjust the parsing to match whatever data shape you get back
-
-        # --- Option A: Use raw JSON to grab the array of files ---
-        file_structure = json.loads(self.state.fileStructurePlanningOutput)
-        files = file_structure["files"]  # This is the array of file specs
-
-        # If no files, exit early
-        if not files:
-            print("No files to generate. Check file structure output.")
-            return
-
-        # Create a list to store all tasks that we'll await concurrently
-        tasks = []
-        
-        # For each file specification, create and launch an async task
-        for file_spec in files:
-            task = asyncio.create_task(
-                self._generate_file_code(file_spec)
-            )
-            tasks.append(task)
-        
-        # Wait for all file generation tasks to complete
-        results = await asyncio.gather(*tasks)
-        
-        # Process results (store in state, etc.)
-        for result in results:
-            if result:  # Skip any None results
-                filename, content = result
-                # Store in state dictionary
-                self.state.generatedCodeFiles[filename] = content
-                
-                # Write the file to disk
-                self._write_file_to_disk(filename, content)
-        
-        print(f"=== Generated {len(self.state.generatedCodeFiles)} code files ===")
 
     @listen(write_code_files)
     def generate_assets(self):
@@ -406,45 +343,6 @@ class GameFlow(Flow[GameState]):
         in a sane directory structure inside ./Game/assets/.
         """
         print("=== Starting Asset Generation Phase ===")
-
-        # Create asset directories
-        try:
-            os.makedirs("./Game/assets/images", exist_ok=True)
-            os.makedirs("./Game/assets/audio", exist_ok=True)
-            os.makedirs("./assets/images", exist_ok=True)
-            os.makedirs("./assets/audio", exist_ok=True)
-            os.makedirs("./public/assets/images", exist_ok=True)
-            os.makedirs("./public/assets/audio", exist_ok=True)
-            print("Created asset directories")
-        except OSError as e:
-            print(f"Warning: Could not create asset directories: {e}")
-
-        # Direct testing of tools before running crew
-        try:
-            print("Testing image generation tool directly...")
-            from unemploymentstudios.crews.asset_generation_crew.asset_generation_crew import GenerateAndDownloadImageTool, SearchAndSaveSoundTool
-            
-            # Test if API keys are available
-            print(f"OPENAI_API_KEY available: {bool(os.getenv('OPENAI_API_KEY'))}")
-            print(f"FREESOUND_API_KEY available: {bool(os.getenv('FREESOUND_API_KEY'))}")
-            
-            # Test image generation directly
-            test_image = GenerateAndDownloadImageTool()
-            image_result = test_image._run(
-                prompt="Test image for game - a simple game logo",
-                file_name="./assets/images/test_direct.png"
-            )
-            print(f"Direct image tool test result: {image_result}")
-            
-            # Test audio generation directly
-            test_audio = SearchAndSaveSoundTool()
-            audio_result = test_audio._run(
-                query="game background music",
-                output_path="./assets/audio/test_direct.mp3"
-            )
-            print(f"Direct audio tool test result: {audio_result}")
-        except Exception as e:
-            print(f"Direct tool testing error: {e}")
 
         # 1. Prepare crew inputs exactly as before
         try:
@@ -457,35 +355,19 @@ class GameFlow(Flow[GameState]):
                 "visual_style": expanded_concept.visual_style,
                 "audio_style": expanded_concept.audio_style,
                 "title": expanded_concept.title,
-                # Add explicit instructions to ensure tool usage
-                "force_tool_usage": True,
-                "required_image_count": 5,  # Minimum number of images to generate
-                "required_audio_count": 3,  # Minimum number of audio files to generate
-                "image_generation_instruction": "You MUST call the generate_and_download_image tool for every asset",
-                "audio_generation_instruction": "You MUST call the search_and_save_sound tool for every sound",
+                "date": datetime.now().strftime("%Y%m%d"),  # ← fix
+
             }
 
-            print(f"Prepared asset inputs: {asset_inputs.keys()}")
-
             # 2. Kick off the AssetGenerationCrew
-            print("Starting AssetGenerationCrew...")
             asset_result = (
                 AssetGenerationCrew()
                 .crew()
                 .kickoff(inputs=asset_inputs)
             )
-            print(f"Asset crew result type: {type(asset_result)}")
-            print(f"Asset crew result has raw: {'raw' in dir(asset_result)}")
-            
             self.state.assetGenerationOutput = asset_result.raw
-            print(f"Asset generation output length: {len(self.state.assetGenerationOutput)}")
-
-            # Output a snippet to help debug
-            output_preview = self.state.assetGenerationOutput[:500] + "..." if len(self.state.assetGenerationOutput) > 500 else self.state.assetGenerationOutput
-            print(f"Asset generation output preview: {output_preview}")
 
             # 3. Copy everything into ./Game/assets/
-            print("Running _organise_generated_assets...")
             self._organise_generated_assets()
 
             # 4. Save raw log for transparency

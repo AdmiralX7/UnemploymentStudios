@@ -1,0 +1,130 @@
+{
+  "files": [
+    {
+      "filename": "index.html",
+      "purpose": "Main entry point of the game.",
+      "content_guidelines": "Sets up initial dependencies including scripts and stylesheets for launching the game.",
+      "dependencies": null
+    },
+    {
+      "filename": "main.js",
+      "purpose": "Central control for game logic and game loop.",
+      "content_guidelines": "Manages real-time updates, user inputs, and state transitions.",
+      "dependencies": ["index.html"]
+    },
+    {
+      "filename": "style.css",
+      "purpose": "Defines styling of the game.",
+      "content_guidelines": "Implements a fantasy-themed color palette.",
+      "dependencies": ["index.html"]
+    },
+    {
+      "filename": "audio.js",
+      "purpose": "Handles audio management for the game.",
+      "content_guidelines": "Manages orchestral soundtrack and audio cues.",
+      "dependencies": ["index.html"]
+    },
+    {
+      "filename": "characters/elara.js",
+      "purpose": "Manages Elara Lightfoot's character functionalities.",
+      "content_guidelines": "Controls abilities, animations, and progression.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "characters/supporting.js",
+      "purpose": "Oversees supporting characters.",
+      "content_guidelines": "Handles logic for interactions and narrative integration.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "characters/enemies.js",
+      "purpose": "Defines AI behavior for enemies.",
+      "content_guidelines": "Specifies combat interactions, especially for boss battles.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "abilities/fireball.js",
+      "purpose": "Manages the Fireball ability's logic.",
+      "content_guidelines": "Handles execution, cooldowns, and interactions.",
+      "dependencies": ["mechanics/puzzles.js"]
+    },
+    {
+      "filename": "abilities/waterwave.js",
+      "purpose": "Manages the Water Wave ability's functionalities.",
+      "content_guidelines": "Enables solving water puzzles.",
+      "dependencies": ["mechanics/puzzles.js"]
+    },
+    {
+      "filename": "abilities/windgust.js",
+      "purpose": "Governs the Wind Gust ability.",
+      "content_guidelines": "Controls interactions for obstacle clearing.",
+      "dependencies": ["mechanics/puzzles.js"]
+    },
+    {
+      "filename": "abilities/earthbarrier.js",
+      "purpose": "Manages the Earth Barrier defensive skill.",
+      "content_guidelines": "Provides defensive tactics against stronger enemies.",
+      "dependencies": ["mechanics/puzzles.js"]
+    },
+    {
+      "filename": "mechanics/combat.js",
+      "purpose": "Outlines the combat system.",
+      "content_guidelines": "Includes combo systems and reactive dynamics.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "mechanics/puzzles.js",
+      "purpose": "Supports environmental puzzle-solving logic.",
+      "content_guidelines": "Integrates elemental abilities.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "levels/easy.js",
+      "purpose": "Develops initial level design and setup.",
+      "content_guidelines": "Introduces base gameplay mechanics and light puzzles.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "levels/boss.js",
+      "purpose": "Constructs the final boss level.",
+      "content_guidelines": "Defines the culmination of learned skills and challenges.",
+      "dependencies": ["main.js"]
+    },
+    {
+      "filename": "resources/mana_health.js",
+      "purpose": "Manages player resources like health and mana.",
+      "content_guidelines": "Balances resource use in line with abilities.",
+      "dependencies": ["characters/elara.js"]
+    },
+    {
+      "filename": "progression/skills.js",
+      "purpose": "Supports skill progression and ability unlocking.",
+      "content_guidelines": "Reflects narrative-driven skill evolution.",
+      "dependencies": ["characters/elara.js"]
+    },
+    {
+      "filename": "config.js",
+      "purpose": "Manages game settings and configurations.",
+      "content_guidelines": "Allows adjustments for difficulty and localization.",
+      "dependencies": ["index.html"]
+    },
+    {
+      "filename": "assets/images/",
+      "purpose": "Contains all game imagery and assets.",
+      "content_guidelines": "Ensures visual coherence with the fantasy theme.",
+      "dependencies": null
+    },
+    {
+      "filename": "assets/sounds/",
+      "purpose": "Houses audio files categorized by gameplay context.",
+      "content_guidelines": "Immersive with thematic and elemental sounds.",
+      "dependencies": ["audio.js"]
+    },
+    {
+      "filename": "assets/fonts/",
+      "purpose": "Stores custom fonts.",
+      "content_guidelines": "Enhances fantasy narrative ambiance.",
+      "dependencies": ["style.css"]
+    }
+  ]
+}
