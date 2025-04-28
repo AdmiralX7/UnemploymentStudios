@@ -1,0 +1,119 @@
+```css
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cinzel', serif;
+    background-color: #0a1a2f;
+    color: #ddd;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel Decorative', cursive;
+    color: #471e68;
+}
+
+p, li, span {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+    font-size: 16px;
+}
+
+a {
+    text-decoration: none;
+    color: #d4af37;
+}
+
+a:hover {
+    color: #c0c0c0;
+    transition: color 0.3s ease;
+}
+
+.primary-bg {
+    background-color: #0b3d22;
+}
+
+.secondary-bg {
+    background-color: #49274a;
+}
+
+.highlight {
+    color: gold;
+    background-color: #8d6e63;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.game-board {
+    border: 2px solid #471e68;
+    padding: 20px;
+    background: rgba(10, 26, 47, 0.8);
+}
+
+.player-info {
+    background-color: #381a2a;
+    border: 2px dashed #8d6e63;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    padding: 10px 20px;
+    background-color: #471e68;
+    color: #ddd;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons:hover {
+    background-color: #c0c0c0;
+    color: #0a1a2f;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37, 0 0 30px #d4af37;
+    }
+    to {
+        box-shadow: 0 0 20px #d4af37, 0 0 30px #d4af37, 0 0 40px #d4af37;
+    }
+}
+
+.action-buttons:focus {
+    outline: none;
+    animation: glow 1.5s infinite alternate;
+}
+
+.game-board:hover {
+    background: rgba(10, 26, 47, 0.9);
+    transition: background 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .game-board,
+    .player-info {
+        margin-bottom: 20px;
+    }
+}
+```
