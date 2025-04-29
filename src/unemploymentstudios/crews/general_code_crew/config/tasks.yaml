@@ -1,0 +1,77 @@
+plan:
+  description: >
+    You (as the planning agent) are responsible for outlining how {filename} will be structured 
+    and what it should contain, based on:
+      - Overall purpose: {purpose}
+      - Guidelines: {content_guidelines}
+      - Dependencies: {dependencies}
+
+    Focus on the high-level layout, sections required, and how the file will integrate 
+    with its dependencies. Do not include any actual code at this stage—just a clear 
+    textual plan.
+  expected_output: >
+    A concise outline describing the intended elements of {filename}, their order 
+    or layout, and how they address {purpose}, {content_guidelines}, and any 
+    requirements from {dependencies}.
+  agent: full_stack_developer
+
+generate_draft:
+  description: >
+    You (as the drafting agent) will create the initial code for {filename} 
+    according to the plan. Adhere closely to:
+      - {purpose}
+      - {content_guidelines}
+      - {dependencies}
+
+    Provide a valid, working code draft (e.g., HTML, JS, etc.) that is ready to 
+    be refined. Include only what's necessary to fulfill the file's stated function.
+  expected_output: >
+    A code draft for {filename}, following the plan from the "plan" task and 
+    implementing all essential elements.
+  agent: javascript_developer
+
+review_and_refine_full_stack:
+  description: >
+    You (as the full-stack developer) will review the drafted code for overall 
+    structure, best practices, and integration points. Ensure that {filename} 
+    remains faithful to its purpose and guidelines without adding new, unrelated 
+    features.
+
+    Adjust or refine the code to improve maintainability, deployment readiness, 
+    and seamless interaction with {dependencies}.
+  expected_output: >
+    An updated version of {filename} that maintains the original scope but 
+    is structurally sound and ready for further specialization.
+  agent: full_stack_developer
+
+review_and_refine_javascript:
+  description: >
+    You (as the JavaScript developer) will examine the code for logical flow, 
+    efficient interactivity, and clean, maintainable scripts (if applicable). 
+    Ensure best practices in JS coding style, performance, and bug avoidance.
+  expected_output: >
+    An updated version of {filename}, refined to enhance or optimize any 
+    JavaScript-related sections without changing the file’s core purpose.
+  agent: javascript_developer
+
+review_and_refine_ui_ux:
+  description: >
+    You (as the UI/UX designer) are responsible for verifying that {filename} 
+    aligns with sound design and usability principles. Focus on layout clarity, 
+    visual hierarchy, and user-friendliness. Propose or apply adjustments that 
+    improve the overall experience but do not expand beyond the file’s 
+    stated function.
+  expected_output: >
+    A polished version of {filename} that maintains usability, readability, 
+    and design cohesion, still within its intended scope.
+  agent: ui_ux_designer
+
+finalize_output:
+  description: >
+    You (as the finalizing agent) must produce the final code for {filename}, 
+    ensuring the output is strictly the raw code only—without additional comments, 
+    metadata, or formatting. Do not introduce new functionality or content; simply 
+    finalize the existing work into a clean, production-ready file.
+  expected_output: >
+    The final, ready-to-use code for {filename} with no extra commentary.
+  agent: code_finalizer

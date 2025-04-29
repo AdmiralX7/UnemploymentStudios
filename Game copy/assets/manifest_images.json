@@ -1,0 +1,17 @@
+{
+  "main_character": {
+    "file": "./assets/images/main_character.png"
+  },
+  "enemy": {
+    "file": "./assets/images/enemy.png"
+  },
+  "background": {
+    "file": "./assets/images/background.png"
+  },
+  "ui_button": {
+    "file": "./assets/images/ui_button.png"
+  },
+  "logo": {
+    "file": "./assets/images/logo.png"
+  }
+}
