@@ -1,26 +1,21 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="An exciting HTML5 game for all ages.">
-    <title>My HTML5 Game</title>
+    <title>CS Student Job Quest</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Include Phaser game engine -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 </head>
 <body>
-    <canvas id="gameCanvas" tabindex="1" style="border: 1px solid black;" width="800" height="600">
-        Your browser does not support the HTML5 canvas element.
-    </canvas>
-    <script src="boot.js" async></script>
-    <script src="preloader.js" async></script>
-    <script src="main.js" async></script>
-    <script>
-        window.addEventListener('load', function() {
-            const canvas = document.getElementById('gameCanvas');
-            canvas.focus();
-        });
-    </script>
+    <div id="game-container"></div>
+    <div id="game-ui">
+        <div id="skill-points">Skill Points: <span id="sp-count">0</span></div>
+        <div id="level-info">Level: <span id="level-name">Intro to Programming</span></div>
+    </div>
+    
+    <!-- Game Scripts -->
+    <script src="game.js"></script>
 </body>
 </html>
-```

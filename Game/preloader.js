@@ -1,57 +1,78 @@
-```javascript
-window.addEventListener('load', function () {
-    const assets = {
-        images: ['visual_assets/image1.png', 'visual_assets/image2.png'],
-        audio: ['audio/sound1.mp3', 'audio/sound2.mp3']
-    };
+const imageAssets = [
+  'assets/images/sky_background.png',
+  'assets/images/ground_tile.png',
+  'assets/images/code_icon.png',
+  'assets/images/bug_sprite.png'
+];
+const audioAssets = [
+  'assets/audio/background_loop.wav',
+  'assets/audio/coin_collect.wav',
+  'assets/audio/jump.wav'
+];
 
-    const totalAssets = assets.images.length + assets.audio.length;
-    let loadedAssets = 0;
+const jsonDependencies = [
+  'levels/intro_to_programming.json',
+  'levels/advanced_algorithms.json',
+  'levels/internship_experience.json',
+  'levels/final_job_interview.json'
+];
 
-    const loadingScreen = document.getElementById('loadingScreen');
-    const progressBar = document.getElementById('progressBar');
+function loadAsset(path) {
+  return new Promise((resolve, reject) => {
+    const extension = path.split('.').pop();
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(extension)) {
+      const img = new Image();
+      img.onload = () => resolve(path);
+      img.onerror = () => reject(new Error(`Failed to load image: ${path}`));
+      img.src = path;
+    } else if (['mp3', 'wav', 'ogg'].includes(extension)) {
+      const audio = new Audio();
+      audio.onloadeddata = () => resolve(path);
+      audio.onerror = () => reject(new Error(`Failed to load audio: ${path}`));
+      audio.src = path;
+    } else if (extension === 'json') {
+      fetch(path)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load JSON: ${path}`);
+          }
+          return response.json();
+        })
+        .then(data => resolve(data))
+        .catch(error => reject(error));
+    } else {
+      reject(new Error(`Unsupported asset type: ${path}`));
+    }
+  });
+}
 
-    const updateProgress = () => {
-        loadedAssets++;
-        const percentage = (loadedAssets / totalAssets) * 100;
-        progressBar.style.width = `${percentage}%`;
+function preloadAssets() {
+  const allAssets = [...imageAssets, ...audioAssets, ...jsonDependencies];
+  const promises = allAssets.map(asset => loadAsset(asset).catch(error => {
+    console.error(error);
+    return null;
+  }));
 
-        if (loadedAssets === totalAssets) {
-            completionCallback();
-        }
-    };
+  return Promise.all(promises);
+}
 
-    const loadImage = (src) => {
-        const img = new Image();
-        img.onload = updateProgress;
-        img.onerror = (e) => errorCallback(e, src);
-        img.src = src;
-    };
-
-    const loadAudio = (src) => {
-        const audio = new Audio();
-        audio.oncanplaythrough = updateProgress;
-        audio.onerror = (e) => errorCallback(e, src);
-        audio.src = src;
-        audio.load();
-    };
-
-    assets.images.forEach(src => loadImage(src));
-    assets.audio.forEach(src => loadAudio(src));
-
-    const completionCallback = () => {
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            startGame();
-        }, 500);
-    };
-
-    const errorCallback = (e, src) => {
-        console.error(`Asset failed to load: ${src}`, e);
-    };
-
-    const startGame = () => {
-        console.log("All assets loaded. Starting the game...");
-    };
+preloadAssets().then(results => {
+  const failedAssets = results.filter(result => result === null);
+  if (failedAssets.length === 0) {
+    console.log('All assets preloaded successfully.');
+    document.dispatchEvent(new Event('assetsLoaded'));
+  } else {
+    console.warn('Some assets failed to preload:', failedAssets);
+    document.dispatchEvent(new Event('assetsLoadedWithErrors'));
+  }
+}).catch(error => {
+  console.error('Error during preloading process:', error);
 });
-```
+
+document.addEventListener('assetsLoaded', () => {
+  console.log('Game can now start!');
+});
+
+document.addEventListener('assetsLoadedWithErrors', () => {
+  console.warn('Game starting with missing assets!');
+});

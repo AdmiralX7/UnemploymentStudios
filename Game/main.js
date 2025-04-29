@@ -1,73 +1,76 @@
 ```javascript
-import { init as gameplayInit, update as gameplayUpdate, handleInput as gameplayHandleInput } from './gameplay.js';
-import { init as mainMenuInit, update as mainMenuUpdate, handleInput as mainMenuHandleInput } from './mainmenu.js';
+/**
+ * main.js
+ *
+ * Purpose: Acts as the central hub for initializing the game and connecting various gaming scripts.
+ * Ensures smooth operation of Alex's adventures across different levels.
+ */
 
-let currentState = 'MainMenu';
-let previousState = null;
-const FRAME_RATE = 60;
-const FRAME_DURATION = 1000 / FRAME_RATE;
+// Import Dependencies
+import './game.js'; // Core game logic
+import './music.js'; // Sound and music management
+import './boot.js'; // Game boot procedure
+import './preloader.js'; // Asset preloading
 
-const States = {
-  MAIN_MENU: 'MainMenu',
-  GAMEPLAY: 'Gameplay'
+// Initialize Global Variables/Settings
+const gameSettings = {
+    volume: 0.5, // Initial volume level from music.js
+    difficulty: 'normal', // Default difficulty setting
+    debugMode: false // Debug mode flag
 };
 
-function changeState(newState) {
-  previousState = currentState;
-  currentState = newState;
-
-  switch (newState) {
-    case States.MAIN_MENU:
-      mainMenuInit();
-      break;
-    case States.GAMEPLAY:
-      gameplayInit();
-      break;
-  }
+// Game Boot Procedure
+function bootGame() {
+    console.log("Booting game...");
+    // Setup initial game environment and perform necessary environment checks
 }
 
-function init() {
-  changeState(States.MAIN_MENU);
-  requestAnimationFrame(mainLoop);
+// Preloading Assets
+function preloadAssets() {
+    console.log("Preloading assets...");
+    // Handle preloading of images, sounds, etc., for smooth game start
+    // Manage loading screens and user feedback during this phase
 }
 
-let lastFrameTime = performance.now();
-
-function mainLoop(currentTime) {
-  const deltaTime = currentTime - lastFrameTime;
-  
-  if (deltaTime >= FRAME_DURATION) {
-    update(currentTime);
-    lastFrameTime = currentTime - (deltaTime % FRAME_DURATION);
-  }
-
-  requestAnimationFrame(mainLoop);
+// Initializing Gameplay
+function initGame() {
+    console.log("Initializing game...");
+    // Setup steps for initializing gameplay, including level transitions and state management
 }
 
-function update(currentTime) {
-  switch (currentState) {
-    case States.MAIN_MENU:
-      mainMenuUpdate(currentTime);
-      break;
-    case States.GAMEPLAY:
-      gameplayUpdate(currentTime);
-      break;
-  }
+// Music and Sound Management
+function setupAudio() {
+    console.log("Setting up audio...");
+    // Functions to adjust audio settings dynamically based on game events
 }
 
-document.addEventListener('keydown', handleInput);
-document.addEventListener('keyup', handleInput);
-
-function handleInput(event) {
-  switch (currentState) {
-    case States.MAIN_MENU:
-      mainMenuHandleInput(event);
-      break;
-    case States.GAMEPLAY:
-      gameplayHandleInput(event);
-      break;
-  }
+// Event Listeners and Handlers
+function setupEventListeners() {
+    console.log("Setting up event listeners...");
+    // Set up user interaction controls for protagonist Alex
 }
 
-init();
+// Game Loop Initialization
+function startGameLoop() {
+    console.log("Starting game loop...");
+    // High-level game loop to continually update game states and render game worlds
+    // Separation of logic for updates versus rendering cycles
+}
+
+// End-Game and Cleanup Procedures
+function cleanupGame() {
+    console.log("Cleaning up game...");
+    // Gracefully close game, clear event listeners, and save progress data
+}
+
+// Execute Boot Sequence
+bootGame();
+preloadAssets();
+initGame();
+setupAudio();
+setupEventListeners();
+startGameLoop();
+
+// Example cleanup call, could be bound to a game over event or window close
+// cleanupGame();
 ```

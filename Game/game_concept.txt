@@ -1,93 +1,83 @@
 {
-  "title": "Aeloria's Odyssey",
-  "tagline": "Unveil the magic within and restore harmony to a world on the brink of shadow.",
-  "overview": "In a wondrous world bathed in magic and melody, a realm resides that teeters on the brink of shadow. When a malevolent force threatens to cloak this land in eternal darkness, a noble hero must rise, discover hidden strengths, forge alliances, and uncover ancient secrets to restore harmony.",
+  "title": "CS Student Job Quest",
+  "tagline": "Embark on an Epic Journey from Classroom to Career!",
+  "overview": "In 'CS Student Job Quest,' players embark on an epic journey through the trials and tribulations of a computer science student. The game world captures both the academic intensity and the professional hustle within an engaging platforming experience. As players navigate through diverse challenges—from academic courses to demanding job interviews—they witness the dedication and perseverance required in the CS field. Ultimately, the goal is to land a coveted full-time tech job, symbolizing personal and professional growth.",
   "main_character": {
-    "name": "Aeloria",
-    "role": "The Prophesied Guardian",
-    "description": "Aeloria is a courageous young mage with a heart as boundless as her magical abilities. She wields the power of light, with wisdom inherited from ancestral spirits. Brave yet humble, Aeloria's journey is as much an inward discovery as an outward quest.",
-    "abilities": ["manipulate elemental forces", "summon ethereal creatures", "heal allies"],
-    "emotional_arc": "Starting as an unsure apprentice, Aeloria evolves into a confident leader, her resolve and compassion lighting the path to a brighter future for her world."
+    "name": "Alex Codewright",
+    "role": "Dedicated Computer Science Student",
+    "description": "Alex Codewright is an ambitious and passionate computer science student who thrives on solving problems and tackling challenges head-on. With a fervor for learning and a dream of breaking into the tech industry, Alex is intent on overcoming every hurdle in their path, from frustrating coding conundrums to nerve-racking interviews.",
+    "abilities": ["debug platforms", "collect code snippets", "utilize learning boosts"],
+    "emotional_arc": "Alex begins as an eager yet slightly overwhelmed student, confronting self-doubt and the pressure of academic life. As the journey unfolds, Alex gains confidence and resilience, becoming a more resourceful and adaptable individual ready to conquer the professional tech world."
   },
   "supporting_characters": [
     {
-      "name": "Sir Eldwin",
-      "role": "Knight Protector",
-      "description": "A veteran warrior with unmatched prowess in combat, Eldwin provides guidance and mentorship to Aeloria.",
-      "abilities": ["mastery with sword and shield", "protective spells"],
-      "emotional_arc": "Eldwin struggles with past failures but finds redemption through nurturing Aeloria's growth."
+      "name": "Prof. Syntax",
+      "role": "Mentor",
+      "description": "Prof. Syntax is a wise and experienced educator who guides Alex through their academic journey. With a penchant for cryptic yet enlightening advice, they offer Alex vital insights and coding wisdom at crucial moments.",
+      "abilities": ["Insight Tokens"],
+      "emotional_arc": "Prof. Syntax inspires Alex's growth, representing stability and encouragement amidst the trials of academia."
     },
     {
-      "name": "Selene",
-      "role": "Mystic Seer",
-      "description": "A mysterious oracle who guards secrets of the ancient world. Her foresight helps guide Aeloria’s path.",
-      "abilities": ["visionary dreams", "aura manipulation"],
-      "emotional_arc": "Detached from the material world, she learns to value human connections through her bond with Aeloria."
+      "name": "Byte Buster",
+      "role": "Chief Bug Creature",
+      "description": "Byte Buster embodies the quintessential nemesis of any programmer—a master of chaos who thrives on creating code bugs and glitches. With mischievous intent, Byte Buster relishes in testing Alex’s patience and problem-solving skills.",
+      "abilities": ["Spawn minor bugs"],
+      "emotional_arc": "Through encounters with Byte Buster, Alex learns the art of perseverance and triumphs over adversity."
     },
     {
-      "name": "Joroak",
-      "role": "Beast Companion",
-      "description": "A shape-shifting creature of the forests, loyal to Aeloria. With a playful spirit, Joroak adds lively joy to the troupe.",
-      "abilities": ["transformation", "animal communication"],
-      "emotional_arc": "Embraces his unique identity, understanding his role in global harmony."
+      "name": "Robo Recruiter",
+      "role": "Final Boss",
+      "description": "The Robo Recruiter is the ultimate gatekeeper of the professional tech world. Equipped with a rigorous bank of challenging interview questions, they gauge Alex's readiness for the industry. Stoic and impartial, they present the final test of Alex’s journey.",
+      "abilities": ["Administer coding challenges"],
+      "emotional_arc": "Confronting the Robo Recruiter, Alex fully realizes their potential, culminating their emotional and professional growth."
     }
   ],
-  "world_building": "The Enchanted Isles are a tapestry of verdant forests, crystalline waters, and soaring mountains. These lands, once united by harmony, now whisper tales of division. Each Island Keeper holds a fragment of a celestial harmony that once rang throughout the world. The lore recites legends of an ancient battle between the Celestial Choir and the Dissonant Forces, setting the stage for Aeloria's journey.",
+  "world_building": "The game is set in a vibrant world representing a blend of academia and the tech industry. Players start on a sprawling university campus, transitioning through detailed backdrops of bustling coding labs, serene libraries, and stimulating lectures. As Alex progresses, they enter dynamic environments depicting the fast-paced, innovative atmosphere of tech companies, complete with lively offices and interactive workspaces. The pixel art aesthetic reinforces both nostalgia and a sense of discovery.",
   "levels": [
     {
-      "name": "Initiation Grove",
-      "description": "Teeming with vibrant flora illuminated by magical luminescence, setting the tone for an enchanted realm.",
+      "name": "Intro to Programming",
+      "description": "Navigate through the basics of coding and programming fundamentals.",
       "difficulty": "Easy",
-      "key_objectives": ["Introduce basic movement", "Use magical abilities (light spells)", "Platforming"],
-      "enemies_obstacles": ["Low-tier shadow creatures", "Moving platforms"],
-      "boss_battle": null
+      "key_objectives": ["Collect code snippets", "Complete mini-games"],
+      "enemies_obstacles": ["Procrastination monsters", "Simple bug puzzles"],
+      "boss_battle": "Basic interview questions with simple coding tasks."
     },
     {
-      "name": "Whispering Forest",
-      "description": "Lush and dense, partly veiled in mystic fog, where bioluminescent plants illuminate hidden paths.",
+      "name": "Advanced Algorithms",
+      "description": "Tackle complex puzzles set within algorithmic challenges.",
       "difficulty": "Medium",
-      "key_objectives": ["Develop puzzle-solving", "Introduce elemental manipulation"],
-      "enemies_obstacles": ["Mystical forest creatures", "Light barriers requiring elemental solutions"],
-      "boss_battle": "Forest Sentinel (necessitates combined element usage to defeat)"
+      "key_objectives": ["Solve algorithmic puzzles", "Optimize code"],
+      "enemies_obstacles": ["Algorithmic errors", "Increased difficulty puzzles"],
+      "boss_battle": "Algorithm interview involving time complexity."
     },
     {
-      "name": "Sunlit Peaks",
-      "description": "Majestic mountain ranges kissed by golden sunlight, reaching into serene skies above.",
-      "difficulty": "Medium",
-      "key_objectives": ["Deepen combat skills", "Integrate companions for strategic advantages"],
-      "enemies_obstacles": ["Rock elementals", "Sliding and collapsible platforms"],
-      "boss_battle": "Mountain Guardian (utilize Joroak for transformations, requiring synchronized attacks)"
-    },
-    {
-      "name": "Shattered Isles",
-      "description": "Fragmented earth suspended over a turbulent sea, wrapped in stark lighting and shadow contrasts.",
+      "name": "Internship Experience",
+      "description": "Simulate real-world scenarios with practical coding tasks.",
       "difficulty": "Hard",
-      "key_objectives": ["Multitasking between puzzle-solving and quick combat"],
-      "enemies_obstacles": ["Aerial threats", "Timed switches"],
-      "boss_battle": "Shadow Harbinger (managing area denial elements and healing allies)"
+      "key_objectives": ["Manage projects", "Collaborate with virtual teams"],
+      "enemies_obstacles": ["Project deadlines", "Collaborative bugs"],
+      "boss_battle": "Interview focusing on teamwork and code reviews."
     },
     {
-      "name": "Celestial Temple",
-      "description": "An ethereal blend of past grandeur and mystical enchantment, resonating with harmonic light patterns reflecting its storied past.",
+      "name": "Final Job Interview",
+      "description": "Face the ultimate challenge with the Robo Recruiter.",
       "difficulty": "Boss",
-      "key_objectives": ["Complex puzzle chains", "Master all mechanics learned"],
-      "enemies_obstacles": ["Elite shadow knights", "Magical traps"],
-      "boss_battle": "Final Confrontation against the Dissonant Lord (unique mechanics requiring unity and full party abilities)"
+      "key_objectives": ["Ace coding challenges", "Answer theoretical questions"],
+      "enemies_obstacles": ["Intense coding exams", "High-pressure scenarios"],
+      "boss_battle": "Final showdown with Robo Recruiter assessing all skills learned."
     }
   ],
   "gameplay_mechanics": [
-    "Platform Jumping", 
-    "Puzzle Solving",
-    "Combat with Magic Abilities",
-    "Elemental Manipulation",
-    "Summoning Allies",
-    "Healing and Buffer Spells",
-    "Environmental Interaction",
-    "Collectible Gathering", 
-    "Character Skill Development"
+    "Classic 2D platforming mechanics",
+    "Educational mini-games and coding puzzles",
+    "Collection of code snippets to earn Skill Points",
+    "Debugging platforms",
+    "AI-generated coding challenges",
+    "Boss battles in the form of interviews",
+    "Adaptive difficulty"
   ],
-  "visual_style": "The visual design captures a vibrant fantasy world, using a luscious color palette that emphasizes natural beauty and magical phenomena. Lush greens, celestial blues, ethereal golds, and mystical purples dominate the landscape, contrasted with ominous shadowy hues in darker settings.",
-  "audio_style": "Orchestral score that accentuates the narrative’s emotional highs and lows. Themes progress from hopeful arias in early levels to dramatic crescendos in the climactic boss battles. Music layers orchestral sweeps, with solo instrumental themes (e.g., violins for Aeloria) to signify character presence and growth.",
-  "emotional_arc": "The emotional journey in this tale is one of self-discovery, resilience, and the power of unity. As Aeloria progresses through different levels, she encounters not only external challenges but also internal struggles of doubt and fear. Her initial insecurities gradually transform into unwavering belief in herself and her companions. By the conclusion, Aeloria has learned that the true essence of magic lies not only in spells but in the love and unity of those she cherishes. Furthermore, the overall narrative of redemption, sacrifice, and triumph reignites the spirit of hope across the Enchanted Isles, leaving players emotionally fulfilled and inspired.",
-  "conclusion": "Aeloria, having mastered her abilities and formed unbreakable bonds with her companions, dispels the looming darkness with the light of harmony. The Enchanted Isles are restored to their former glory, unified and vibrant. Aeloria's odyssey becomes a legend that echoes through time—a testament to the power of courage, friendship, and the magic within."
+  "visual_style": "Nostalgic pixel art style reminiscent of classic retro platformers with vibrant academic-themed environments.",
+  "audio_style": "Atmospheric chiptune-influenced soundtrack with dynamic looping to adapt to gameplay intensity.",
+  "emotional_arc": "CS Student Job Quest invites players on an emotional rollercoaster, mirroring Alex’s personal development. Starting from a point of aspiration and uncertainty, each level successfully builds upon the last to foster Alex's growth in skill and confidence. Players experience the thrill of small victories over procrastination and coding errors, fueling a sense of achievement. As Alex approaches the final challenge, they reflect on their transformation from a nascent student to an industry-ready professional, capturing the emotional depth and determination intrinsic to any meaningful career path.",
+  "conclusion": "In conclusion, the mechanics are structured to offer a cohesive and balanced gameplay experience that intricately ties together narrative progression and character development, ensuring players engage with both reflexive platforming and strategic challenges in 'CS Student Job Quest.'"
 }

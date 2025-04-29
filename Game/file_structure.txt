@@ -2,159 +2,141 @@
   "files": [
     {
       "filename": "index.html",
-      "purpose": "Serves as the entry point for the game, loading necessary scripts, styles, and establishing the game canvas.",
-      "content_guidelines": "Links vital scripts and CSS, sets up the game canvas, and provides metadata for the game.",
-      "dependencies": ["style.css", "main.js", "boot.js", "preloader.js"]
+      "purpose": "Serves as the main entry point for the game, embedding essential CSS and JavaScript files to render the game and initiate user interactions.",
+      "content_guidelines": "Initiates game interface aligned with visual and functional requirements.",
+      "dependencies": ["style.css", "boot.js", "game.js", "preloader.js"]
     },
     {
       "filename": "style.css",
-      "purpose": "Manages the visual styling of the game's UI components.",
-      "content_guidelines": "Defines styles for menus, dialogue boxes, HUD elements, ensuring they complement the visual design themes using the specified color palette.",
-      "dependencies": []
+      "purpose": "Defines aesthetic properties, supporting nostalgic pixel art style and consistent visual presentation.",
+      "content_guidelines": "Ensure visual consistency across devices, maintaining vibrant, academic-themed environments.",
+      "dependencies": null
     },
     {
-      "filename": "main.js",
-      "purpose": "Central hub for initializing the game, handling the main game loop, and coordinating between different game states.",
-      "content_guidelines": "Coordinates transitions between game states, manages game clock, oversees global input handling.",
-      "dependencies": ["gameplay.js", "mainmenu.js"]
+      "filename": "game.js",
+      "purpose": "Handles overall game initialization, orchestrating state management, user inputs, and integrating game modules.",
+      "content_guidelines": "Facilitates smooth gameplay transitions and interaction.",
+      "dependencies": ["boot.js", "preloader.js", "character/alex_codewright.js", "mechanics/platforming.js"]
     },
     {
       "filename": "boot.js",
-      "purpose": "Handles initial game configuration and settings.",
-      "content_guidelines": "Loads the basic game configuration, including setting up the physics system and configuring resolution and scale settings.",
-      "dependencies": []
+      "purpose": "Sets up initial game configurations and global variables.",
+      "content_guidelines": "Prepares the game engine for resource loading.",
+      "dependencies": null
     },
     {
       "filename": "preloader.js",
-      "purpose": "Manages the loading of all game assets before gameplay begins.",
-      "content_guidelines": "Loads images, audio files, animations, and other assets, displaying a loading screen until all assets are ready.",
-      "dependencies": ["visual_assets/", "audio/"]
+      "purpose": "Manages the loading of essential assets like images and audio files.",
+      "content_guidelines": "Sustain user immersion by preloading resources smoothly.",
+      "dependencies": ["levels/intro_to_programming.json", "levels/advanced_algorithms.json", "levels/internship_experience.json", "levels/final_job_interview.json"]
     },
     {
       "filename": "music.js",
-      "purpose": "Handles the orchestral score and all sound effects.",
-      "content_guidelines": "Coordinates playback of background music and sound effects, aligning music transitions with narrative cues.",
-      "dependencies": ["audio/music/", "audio/sfx/"]
+      "purpose": "Manages dynamic soundtrack, adjusting music to align with gameplay intensity.",
+      "content_guidelines": "Enhance player engagement through auditory stimuli.",
+      "dependencies": ["audio/background_music.ogg", "audio/battle_tracks.ogg", "emotional_tone.js"]
     },
     {
-      "filename": "mainmenu.js",
-      "purpose": "Defines the behavior and appearance of the game's main menu.",
-      "content_guidelines": "Manages main menu navigation, starting new games, loading saved games, and settings access.",
-      "dependencies": ["index.html"]
+      "filename": "levels/intro_to_programming.json",
+      "purpose": "Defines the 'Intro to Programming' level design, including enemy placements and objectives.",
+      "content_guidelines": "Reflect Alex's early academic challenges.",
+      "dependencies": null
     },
     {
-      "filename": "gameplay.js",
-      "purpose": "Core game logic handler for gameplay mechanics like movement and interaction.",
-      "content_guidelines": "Implements primary gameplay features such as platform jumping, puzzle-solving, combat.",
-      "dependencies": ["aeloria.js", "support_characters.js", "levels/", "boss_battles/"]
+      "filename": "levels/advanced_algorithms.json",
+      "purpose": "Defines the 'Advanced Algorithms' level design, enhancing difficulty.",
+      "content_guidelines": "Promote algorithmic thinking and puzzle solving.",
+      "dependencies": null
     },
     {
-      "filename": "aeloria.js",
-      "purpose": "Specific script for managing Aeloria’s character logic and progression.",
-      "content_guidelines": "Contains Aeloria’s ability scripts, experience gain, and skill development.",
-      "dependencies": []
+      "filename": "levels/internship_experience.json",
+      "purpose": "Simulates real-world coding tasks for 'Internship Experience'.",
+      "content_guidelines": "Reflect professional growth through project management and team collaboration.",
+      "dependencies": null
     },
     {
-      "filename": "support_characters.js",
-      "purpose": "Manages AI and interactions of supporting characters.",
-      "content_guidelines": "Handles logic for teamwork and complementary skills for characters that assist Aeloria.",
-      "dependencies": []
+      "filename": "levels/final_job_interview.json",
+      "purpose": "Defines the 'Final Job Interview' level with the Robo Recruiter.",
+      "content_guidelines": "Test all skills learned and culminate narrative and character growth.",
+      "dependencies": null
     },
     {
-      "filename": "levels/initiation_grove.js",
-      "purpose": "Script for the Initiation Grove level, introducing core mechanics and setting the tone.",
-      "content_guidelines": "Includes basic movement, magic abilities, and initial platforming tasks.",
-      "dependencies": []
+      "filename": "character/alex_codewright.js",
+      "purpose": "Manages Alex Codewright's mechanics and progression.",
+      "content_guidelines": "Facilitate character's academic and professional growth journey.",
+      "dependencies": null
     },
     {
-      "filename": "levels/whispering_forest.js",
-      "purpose": "Focuses on puzzle-solving and elemental manipulation.",
-      "content_guidelines": "Develops player skills in puzzles and elemental interaction.",
-      "dependencies": []
+      "filename": "challenges/simple_bugs.js",
+      "purpose": "Handles educational bug puzzles.",
+      "content_guidelines": "Offer structured problem-solving scenarios at various skill levels.",
+      "dependencies": null
     },
     {
-      "filename": "levels/sunlit_peaks.js",
-      "purpose": "Centers on enhancing combat skills and integrating companions.",
-      "content_guidelines": "Requires using Joroak for transformations and combined attacks.",
-      "dependencies": []
+      "filename": "challenges/ai_puzzles.js",
+      "purpose": "Manages AI-generated coding challenges.",
+      "content_guidelines": "Encourage learning through diverse programming obstacles.",
+      "dependencies": null
     },
     {
-      "filename": "levels/shattered_isles.js",
-      "purpose": "Challenges players with multitasking puzzles and quick combat.",
-      "content_guidelines": "Introduces aerial threats and timed switches.",
-      "dependencies": []
+      "filename": "emotional_tone.js",
+      "purpose": "Dynamically adjusts dialogues and soundtrack to enhance emotional experiences.",
+      "content_guidelines": "Reflect character development and narrative arcs.",
+      "dependencies": ["music.js"]
     },
     {
-      "filename": "levels/celestial_temple.js",
-      "purpose": "Culminates all skills with complex puzzles and the final boss battle.",
-      "content_guidelines": "Master all mechanics learned, face the Dissonant Lord.",
-      "dependencies": []
+      "filename": "visual_assets/characters/",
+      "purpose": "Stores pixel art sprites for characters.",
+      "content_guidelines": "Ensure thematic clarity and cohesion.",
+      "dependencies": null
     },
     {
-      "filename": "boss_battles/forest_sentinel.js",
-      "purpose": "Script focused on the Forest Sentinel boss mechanics.",
-      "content_guidelines": "Necessitates combined element usage to defeat.",
-      "dependencies": []
+      "filename": "visual_assets/environments/",
+      "purpose": "Stores pixel art environments.",
+      "content_guidelines": "Maintain academic and retro-aesthetic consistency.",
+      "dependencies": null
     },
     {
-      "filename": "boss_battles/mountain_guardian.js",
-      "purpose": "Script focused on the Mountain Guardian boss mechanics.",
-      "content_guidelines": "Utilize Joroak transformations and synchronized attacks.",
-      "dependencies": []
+      "filename": "visual_assets/collectables/",
+      "purpose": "Stores collectable item sprites.",
+      "content_guidelines": "Enhance interactivity and world-building.",
+      "dependencies": null
     },
     {
-      "filename": "boss_battles/shadow_harbinger.js",
-      "purpose": "Script focused on the Shadow Harbinger boss mechanics.",
-      "content_guidelines": "Manage area denial elements and heal allies.",
-      "dependencies": []
+      "filename": "audio/background_music.ogg",
+      "purpose": "Contains the main soundtrack.",
+      "content_guidelines": "Support immersive and adaptive audio design.",
+      "dependencies": null
     },
     {
-      "filename": "boss_battles/dissonant_lord.js",
-      "purpose": "Final Confrontation against the Dissonant Lord.",
-      "content_guidelines": "Unique mechanics requiring unity and full party abilities.",
-      "dependencies": []
+      "filename": "audio/battle_tracks.ogg",
+      "purpose": "Contains intense battle themes.",
+      "content_guidelines": "Enhance player engagement during pivotal moments.",
+      "dependencies": null
     },
     {
-      "filename": "visual_assets/sprites",
-      "purpose": "Holds all character and environment sprite sheets.",
-      "content_guidelines": "Maintain character animations and environments.",
-      "dependencies": []
+      "filename": "mechanics/platforming.js",
+      "purpose": "Contains scripts for 2D platforming mechanics.",
+      "content_guidelines": "Simulate classic interactions such as jumping and collision.",
+      "dependencies": null
     },
     {
-      "filename": "visual_assets/backgrounds",
-      "purpose": "Landscape and level background images.",
-      "content_guidelines": "Maintain visual themes.",
-      "dependencies": []
+      "filename": "minigames/educational_games.js",
+      "purpose": "Manages educational mini-games.",
+      "content_guidelines": "Impart coding skills while maintaining gameplay engagement.",
+      "dependencies": null
     },
     {
-      "filename": "audio/music",
-      "purpose": "Orchestral tracks for various levels and scenes.",
-      "content_guidelines": "Level-based tracks to support immersion.",
-      "dependencies": []
+      "filename": "minigames/boss_battles.js",
+      "purpose": "Handles boss encounters.",
+      "content_guidelines": "Align with character and narrative development.",
+      "dependencies": null
     },
     {
-      "filename": "audio/sfx",
-      "purpose": "Sound effects such as magic spells and interaction cues.",
-      "content_guidelines": "Feedback cues for actions.",
-      "dependencies": []
-    },
-    {
-      "filename": "audio/voice",
-      "purpose": "Dialogue voices for character interactions and cutscenes.",
-      "content_guidelines": "Enhances story delivery.",
-      "dependencies": []
-    },
-    {
-      "filename": "cutscenes.js",
-      "purpose": "Manages in-game cutscene scripts and execution.",
-      "content_guidelines": "Creates narrative depth by displaying story elements.",
-      "dependencies": []
-    },
-    {
-      "filename": "dialogue.js",
-      "purpose": "Handles all in-game dialogue interactions.",
-      "content_guidelines": "Deliver engaging story-based conversations.",
-      "dependencies": []
+      "filename": "difficulty_manager.js",
+      "purpose": "Oversees adaptive difficulty logic.",
+      "content_guidelines": "Adjust challenge levels based on player performance.",
+      "dependencies": null
     }
   ]
 }
